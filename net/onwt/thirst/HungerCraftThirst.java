@@ -1,6 +1,6 @@
 package net.onwt.thirst;
 
-import net.hungercraft.core.api.PermissionsChangeEvent;
+import net.hungercraft.core.utils.PermissionsChangeEvent;
 import net.hungercraft.core.managers.BoardManager;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
