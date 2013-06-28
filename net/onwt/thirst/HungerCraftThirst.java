@@ -1,11 +1,16 @@
 package net.onwt.thirst;
 
+import net.hungercraft.core.managers.SettingsManager;
 import net.hungercraft.core.utils.PermissionsChangeEvent;
 import net.hungercraft.core.managers.BoardManager;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
@@ -91,16 +96,57 @@ public class HungerCraftThirst extends JavaPlugin implements Listener, Runnable 
                 else if(thirstLevel <= 75)
                     p.sendMessage("Thirst level: 75");
 
-                players.put(s, thirstLevel);
-                BoardManager.getInstance().setSpecificValue(p, ChatColor.GREEN + "Thirst", thirstLevel);
             }
         }
 
     }
 
-    @EventHandler
+    public void setThirst(String playerName, int amount) {
+        players.put(playerName, amount);
+        BoardManager.getInstance().setSpecificValue(getServer().getPlayer(playerName), ChatColor.GREEN + "Thirst", amount);
+    }
+
+
+
+    @EventHandler (priority = EventPriority.HIGHEST)
     public void onInteract(PlayerInteractEvent event)
     {
+        //if the player is a thirster, then proceed
+        if(players.containsKey(event.getPlayer().getName()))
+        {
+            //if the player clicked water with a bowl, then relieve
+            //his thirst
+            if (players.get(event.getPlayer()) < 100 && ((event.getItem() != null && event.getItem().getTypeId() == 373 && event.getItem().getDurability() == 0 && (event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK))) || (event.getPlayer().getLocation().getBlock().getType().equals(Material.WATER) || event.getPlayer().getLocation().getBlock().getType().equals(Material.STATIONARY_WATER) || event.getPlayer().getLocation().getBlock().getType().equals(Material.WATER))))
+            {
+                if(SettingsManager.getInstance().getHardcoreMode())
+                {
+                    players.put(event.getPlayer().getName(), Math.min(players.get(event.getPlayer()) + 25, 100));
 
+                    if(players.get(event.getPlayer()) >= 100)
+                        event.getPlayer().sendMessage("You quench your thirst.");
+                    else
+                        event.getPlayer().sendMessage("You take a sip of water.");
+                }
+                else
+                {
+                    players.put(event.getPlayer().getName(), 100);
+                    event.getPlayer().sendMessage("You quench your thirst");
+                }
+
+
+
+                event.getPlayer().setExp(this.players.get(event.getPlayer()) / 100.f);
+
+                //place an empty bottle in the players inventory
+                if(event.getItem() != null && event.getItem().getTypeId() == 373)
+                {
+                    event.setUseItemInHand(Event.Result.DENY);
+                    event.getItem().setTypeId(374);
+                }
+            }
+
+            if(event.getItem() != null && event.getItem().getTypeId() == 373 && event.getItem().getDurability() == 0)
+                event.setUseItemInHand(Event.Result.DENY);
+        }
     }
 }
