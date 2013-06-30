@@ -76,26 +76,29 @@ public class HungerCraftThirst extends JavaPlugin implements Listener, Runnable 
         for(String s : players.keySet())
         {
             Player p = getServer().getPlayer(s);
-            if(p.isOnline()) {
-                int thirstLevel = players.get(s) - 2;
 
-                if(thirstLevel <= 0) {
-                    p.sendMessage("Find something to drink!");
-                    thirstLevel = 0;
-                    p.damage(4);
+            if(p != null) {
+                if(p.isOnline()) {
+                    int thirstLevel = players.get(s) - 2;
+
+                    if(thirstLevel <= 0) {
+                        p.sendMessage("Find something to drink!");
+                        thirstLevel = 0;
+                        p.damage(4);
+                    }
+
+                    if(thirstLevel <= 20) {
+                        p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 200, 1));
+                    }
+
+                    if(thirstLevel <= 25)
+                        p.sendMessage("Thirst level: 25");
+                    else if(thirstLevel <= 50)
+                        p.sendMessage("Thirst level: 50");
+                    else if(thirstLevel <= 75)
+                        p.sendMessage("Thirst level: 75");
+
                 }
-
-                if(thirstLevel <= 20) {
-                    p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 200, 1));
-                }
-
-                if(thirstLevel <= 25)
-                    p.sendMessage("Thirst level: 25");
-                else if(thirstLevel <= 50)
-                    p.sendMessage("Thirst level: 50");
-                else if(thirstLevel <= 75)
-                    p.sendMessage("Thirst level: 75");
-
             }
         }
 
@@ -116,37 +119,37 @@ public class HungerCraftThirst extends JavaPlugin implements Listener, Runnable 
         {
             //if the player clicked water with a bowl, then relieve
             //his thirst
-            if (players.get(event.getPlayer()) < 100 && ((event.getItem() != null && event.getItem().getTypeId() == 373 && event.getItem().getDurability() == 0 && (event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK))) || (event.getPlayer().getLocation().getBlock().getType().equals(Material.WATER) || event.getPlayer().getLocation().getBlock().getType().equals(Material.STATIONARY_WATER) || event.getPlayer().getLocation().getBlock().getType().equals(Material.WATER))))
-            {
-                if(SettingsManager.getInstance().getHardcoreMode())
-                {
-                    players.put(event.getPlayer().getName(), Math.min(players.get(event.getPlayer()) + 25, 100));
+            if (players.get(event.getPlayer().getName()) < 100 && event.getItem() != null) {
+                if(event.getItem().getTypeId() == 373) {
 
-                    if(players.get(event.getPlayer()) >= 100)
-                        event.getPlayer().sendMessage("You quench your thirst.");
+
+
+                    if(SettingsManager.getInstance().getHardcoreMode())
+                    {
+                        players.put(event.getPlayer().getName(), Math.min(players.get(event.getPlayer()) + 25, 100));
+
+                        if(players.get(event.getPlayer()) >= 100)
+                            event.getPlayer().sendMessage("You quench your thirst.");
+                        else
+                            event.getPlayer().sendMessage("You take a sip of water.");
+                    }
                     else
-                        event.getPlayer().sendMessage("You take a sip of water.");
+                    {
+                        players.put(event.getPlayer().getName(), 100);
+                        event.getPlayer().sendMessage("You quench your thirst");
+                    }
+
+                    //place an empty bottle in the players inventory
+                    if(event.getItem() != null && event.getItem().getTypeId() == 373)
+                    {
+                        event.setUseItemInHand(Event.Result.DENY);
+                        event.getItem().setTypeId(374);
+                    }
                 }
-                else
-                {
-                    players.put(event.getPlayer().getName(), 100);
-                    event.getPlayer().sendMessage("You quench your thirst");
-                }
 
-
-
-                event.getPlayer().setExp(this.players.get(event.getPlayer()) / 100.f);
-
-                //place an empty bottle in the players inventory
-                if(event.getItem() != null && event.getItem().getTypeId() == 373)
-                {
+                if(event.getItem() != null && event.getItem().getTypeId() == 373 && event.getItem().getDurability() == 0)
                     event.setUseItemInHand(Event.Result.DENY);
-                    event.getItem().setTypeId(374);
-                }
             }
-
-            if(event.getItem() != null && event.getItem().getTypeId() == 373 && event.getItem().getDurability() == 0)
-                event.setUseItemInHand(Event.Result.DENY);
         }
     }
 }
