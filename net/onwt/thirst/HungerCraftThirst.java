@@ -1,5 +1,7 @@
 package net.onwt.thirst;
 
+import net.hungercraft.core.api.GameState;
+import net.hungercraft.core.managers.GameManager;
 import net.hungercraft.core.managers.SettingsManager;
 import net.hungercraft.core.utils.PermissionsChangeEvent;
 import net.hungercraft.core.managers.BoardManager;
@@ -73,35 +75,39 @@ public class HungerCraftThirst extends JavaPlugin implements Listener, Runnable 
 
     @Override
     public void run () {
-        for(String s : players.keySet())
-        {
-            Player p = getServer().getPlayer(s);
+        if(GameState.isInGame()) {
+            if(GameManager.getInstance().getGame().getArena().getThirstEnabled()) {
+                for(String s : players.keySet())
+                {
+                    Player p = getServer().getPlayer(s);
 
-            if(p != null) {
-                if(p.isOnline()) {
-                    int thirstLevel = players.get(s) - 2;
+                    if(p != null) {
+                        if(p.isOnline()) {
+                            int thirstLevel = players.get(s) - 2;
 
-                    if(thirstLevel <= 0) {
-                        p.sendMessage("Find something to drink!");
-                        thirstLevel = 0;
-                        p.damage(4);
+                            if(thirstLevel <= 0) {
+                                p.sendMessage("Find something to drink!");
+                                thirstLevel = 0;
+                                p.damage(4);
+                            }
+
+                            if(thirstLevel <= 20) {
+                                p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 200, 1));
+                            }
+
+                            if(thirstLevel <= 25)
+                                p.sendMessage("Thirst level: 25");
+                            else if(thirstLevel <= 50)
+                                p.sendMessage("Thirst level: 50");
+                            else if(thirstLevel <= 75)
+                                p.sendMessage("Thirst level: 75");
+
+                            setThirst(s, thirstLevel);
+                        }
                     }
-
-                    if(thirstLevel <= 20) {
-                        p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 200, 1));
-                    }
-
-                    if(thirstLevel <= 25)
-                        p.sendMessage("Thirst level: 25");
-                    else if(thirstLevel <= 50)
-                        p.sendMessage("Thirst level: 50");
-                    else if(thirstLevel <= 75)
-                        p.sendMessage("Thirst level: 75");
-
                 }
             }
         }
-
     }
 
     public void setThirst(String playerName, int amount) {
