@@ -95,12 +95,10 @@ public class HungerCraftThirst extends JavaPlugin implements Listener, Runnable 
                                 p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 200, 1));
                             }
 
-                            if(thirstLevel <= 25)
-                                p.sendMessage("Thirst level: 25");
-                            else if(thirstLevel <= 50)
+                            if(thirstLevel == 20)
+                                p.sendMessage("Thirst level: 20");
+                            else if(thirstLevel == 50)
                                 p.sendMessage("Thirst level: 50");
-                            else if(thirstLevel <= 75)
-                                p.sendMessage("Thirst level: 75");
 
                             setThirst(s, thirstLevel);
                         }
