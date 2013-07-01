@@ -19,6 +19,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.HashMap;
+import java.util.Iterator;
 
 
 /**
@@ -77,8 +78,11 @@ public class HungerCraftThirst extends JavaPlugin implements Listener, Runnable 
     public void run () {
         if(GameState.isInGame()) {
             if(GameManager.getInstance().getGame().getArena().getThirstEnabled()) {
-                for(String s : players.keySet())
-                {
+                Iterator<String> it = players.keySet().iterator();
+
+                while(it.hasNext()) {
+                    String s  = it.next();
+
                     Player p = getServer().getPlayer(s);
 
                     if(p != null) {
@@ -124,8 +128,8 @@ public class HungerCraftThirst extends JavaPlugin implements Listener, Runnable 
             //if the player clicked water with a bowl, then relieve
             //his thirst
             if (players.get(event.getPlayer().getName()) < 100 && event.getItem() != null) {
-                if(event.getItem().getTypeId() == 373) {
 
+                if (players.get(event.getPlayer()) < 100 && ((event.getItem() != null && event.getItem().getTypeId() == 373 && event.getItem().getDurability() == 0 && (event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK))) || (event.getPlayer().getLocation().getBlock().getType().equals(Material.WATER) || event.getPlayer().getLocation().getBlock().getType().equals(Material.STATIONARY_WATER) || event.getPlayer().getLocation().getBlock().getType().equals(Material.WATER)))) {
 
 
                     if(SettingsManager.getInstance().getHardcoreMode())
