@@ -14,6 +14,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -125,39 +126,47 @@ public class HungerCraftThirst extends JavaPlugin implements Listener, Runnable 
         //if the player is a thirster, then proceed
         if(players.containsKey(event.getPlayer().getName()))
         {
+            ItemStack is = event.getItem();
+            Action a = event.getAction();
+            Material type = event.getPlayer().getLocation().getBlock().getType();
+            int thirstlevel = players.get(event.getPlayer().getName());
+            boolean isInWater = type.equals(Material.STATIONARY_WATER) || type.equals(Material.WATER);
+
+
             //if the player clicked water with a bowl, then relieve
             //his thirst
-            if (players.get(event.getPlayer().getName()) < 100 && event.getItem() != null) {
+            if (thirstlevel < 100) {
 
-                if (players.get(event.getPlayer()) < 100 && ((event.getItem() != null && event.getItem().getTypeId() == 373 && event.getItem().getDurability() == 0 && (event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK))) || (event.getPlayer().getLocation().getBlock().getType().equals(Material.WATER) || event.getPlayer().getLocation().getBlock().getType().equals(Material.STATIONARY_WATER) || event.getPlayer().getLocation().getBlock().getType().equals(Material.WATER)))) {
-
-
-                    if(SettingsManager.getInstance().getHardcoreMode())
-                    {
-                        players.put(event.getPlayer().getName(), Math.min(players.get(event.getPlayer()) + 25, 100));
-
-                        if(players.get(event.getPlayer()) >= 100)
-                            event.getPlayer().sendMessage("You quench your thirst.");
-                        else
-                            event.getPlayer().sendMessage("You take a sip of water.");
-                    }
-                    else
-                    {
-                        players.put(event.getPlayer().getName(), 100);
-                        event.getPlayer().sendMessage("You quench your thirst");
-                    }
-
-                    //place an empty bottle in the players inventory
-                    if(event.getItem() != null && event.getItem().getTypeId() == 373)
-                    {
-                        event.setUseItemInHand(Event.Result.DENY);
-                        event.getItem().setTypeId(374);
-                    }
+                if(is != null) {
+                    if(is.getTypeId() == 373)
+                        increaseThirst(event.getPlayer(), is, event);
                 }
 
-                if(event.getItem() != null && event.getItem().getTypeId() == 373 && event.getItem().getDurability() == 0)
-                    event.setUseItemInHand(Event.Result.DENY);
+                if(isInWater && a.equals(Action.RIGHT_CLICK_BLOCK) || a.equals(Action.RIGHT_CLICK_AIR)) {
+                    increaseThirst(event.getPlayer(), is, event);
+                }
+
+
             }
         }
     }
+
+
+    public void increaseThirst(Player p, ItemStack is, PlayerInteractEvent e) {
+
+        if(players.get(p.getName()) >= 100) {
+            p.sendMessage("You quench your thirst.");
+        } else {
+            setThirst(p.getName(), 100);
+            p.sendMessage("You quench your thirst");
+        }
+
+        //place an empty bottle in the players inventory
+        if(is != null && is.getTypeId() == 373) {
+            e.setUseItemInHand(Event.Result.DENY);
+            e.getItem().setTypeId(374);
+        }
+
+    }
 }
+
