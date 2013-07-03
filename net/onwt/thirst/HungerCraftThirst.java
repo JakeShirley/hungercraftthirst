@@ -138,11 +138,13 @@ public class HungerCraftThirst extends JavaPlugin implements Listener, Runnable 
             if (thirstlevel < 100) {
 
                 if(is != null) {
-                    if(is.getTypeId() == 373)
+                    if(is.getTypeId() == 373) {
                         increaseThirst(event.getPlayer(), is, event);
+                    }
                 }
 
-                if(isInWater && a.equals(Action.RIGHT_CLICK_BLOCK) || a.equals(Action.RIGHT_CLICK_AIR)) {
+                if(isInWater && (a.equals(Action.RIGHT_CLICK_BLOCK) || a.equals(Action.RIGHT_CLICK_AIR))) {
+
                     increaseThirst(event.getPlayer(), is, event);
                 }
 
