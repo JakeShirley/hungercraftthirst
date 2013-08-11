@@ -2,11 +2,15 @@ package net.onwt.thirst;
 
 import net.hungercraft.core.api.GameState;
 import net.hungercraft.core.managers.GameManager;
+import net.hungercraft.core.managers.PermissionsManager;
 import net.hungercraft.core.managers.SettingsManager;
 import net.hungercraft.core.utils.PermissionsChangeEvent;
 import net.hungercraft.core.managers.BoardManager;
+
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Biome;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -14,6 +18,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
@@ -75,6 +80,20 @@ public class HungerCraftThirst extends JavaPlugin implements Listener, Runnable 
 
     }
 
+    @EventHandler
+    public void onMove(PlayerMoveEvent event)
+    {
+    	Player p = event.getPlayer();
+    	String n = p.getName();
+    	if(players.get(n) == null && PermissionsManager.getInstance().isCombatant(p)) {
+    		players.put(n, 100);
+    	}
+    	
+    	if(players.get(n) <= 20 && p.isSprinting()) {
+    		p.setSprinting(false);
+    	}
+    }
+    
     @Override
     public void run () {
         if(GameState.isInGame()) {
@@ -88,8 +107,29 @@ public class HungerCraftThirst extends JavaPlugin implements Listener, Runnable 
 
                     if(p != null) {
                         if(p.isOnline()) {
-                            int thirstLevel = players.get(s) - 2;
-
+                        	
+                        	
+                        	int offset = 2;
+                        	Location l = p.getLocation();
+                        	Biome b = p.getWorld().getBiome((int)l.getX(), (int)l.getY());
+                        	
+                        	//double thirst decrement in desert biomes
+                        	if(b == Biome.DESERT || b == Biome.DESERT_HILLS) {
+                        		offset = 4;
+                        	} else {
+                        		//they aren't in the desert or desert hills, check if it is raining
+                        		if(p.getWorld().hasStorm()) {
+                        			offset = 1;
+                        		}
+                        		
+                        	}
+                        	
+                        	
+                        	int thirstLevel = players.get(s) - offset;
+                        	
+                        	
+                        	
+                        	
                             if(thirstLevel <= 0) {
                                 p.sendMessage("Find something to drink!");
                                 thirstLevel = 0;
@@ -97,13 +137,13 @@ public class HungerCraftThirst extends JavaPlugin implements Listener, Runnable 
                             }
 
                             if(thirstLevel <= 20) {
-                                p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 200, 1));
+                                p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 220, 1));
                             }
 
-                            if(thirstLevel == 20)
-                                p.sendMessage("Thirst level: 20");
-                            else if(thirstLevel == 50)
-                                p.sendMessage("Thirst level: 50");
+                            if(thirstLevel <= 20)
+                                p.sendMessage("You are very thirsty! Find something to drink.");
+                            else if(thirstLevel <= 50)
+                                p.sendMessage("You are getting thirsty...");
 
                             setThirst(s, thirstLevel);
                         }
