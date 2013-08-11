@@ -80,20 +80,6 @@ public class HungerCraftThirst extends JavaPlugin implements Listener, Runnable 
 
     }
 
-    @EventHandler
-    public void onMove(PlayerMoveEvent event)
-    {
-    	Player p = event.getPlayer();
-    	String n = p.getName();
-    	if(players.get(n) == null && PermissionsManager.getInstance().isCombatant(p)) {
-    		players.put(n, 100);
-    	}
-    	
-    	if(players.get(n) <= 20 && p.isSprinting()) {
-    		p.setSprinting(false);
-    	}
-    }
-    
     @Override
     public void run () {
         if(GameState.isInGame()) {
@@ -111,7 +97,7 @@ public class HungerCraftThirst extends JavaPlugin implements Listener, Runnable 
                         	
                         	int offset = 2;
                         	Location l = p.getLocation();
-                        	Biome b = p.getWorld().getBiome((int)l.getX(), (int)l.getY());
+                        	Biome b = l.getBlock().getBiome();
                         	
                         	//double thirst decrement in desert biomes
                         	if(b == Biome.DESERT || b == Biome.DESERT_HILLS) {
