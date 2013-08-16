@@ -18,6 +18,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -145,14 +146,22 @@ public class HungerCraftThirst extends JavaPlugin implements Listener, Runnable 
     }
 
 
+    
+    @EventHandler
+    public void onConsume(PlayerItemConsumeEvent event)
+    {
+    	if(event.getItem().getTypeId() == 373) {
+    		increaseThirst(event.getPlayer());
+    	}
+    }
 
+    //handles drinking directly from water
     @EventHandler (priority = EventPriority.HIGHEST)
     public void onInteract(PlayerInteractEvent event)
     {
         //if the player is a thirster, then proceed
         if(players.containsKey(event.getPlayer().getName()))
         {
-            ItemStack is = event.getItem();
             Action a = event.getAction();
             Material type = event.getPlayer().getLocation().getBlock().getType();
             int thirstlevel = players.get(event.getPlayer().getName());
@@ -163,15 +172,10 @@ public class HungerCraftThirst extends JavaPlugin implements Listener, Runnable 
             //his thirst
             if (thirstlevel < 100) {
 
-                if(is != null) {
-                    if(is.getTypeId() == 373) {
-                        increaseThirst(event.getPlayer(), is, event);
-                    }
-                }
 
                 if(isInWater && (a.equals(Action.RIGHT_CLICK_BLOCK) || a.equals(Action.RIGHT_CLICK_AIR))) {
 
-                    increaseThirst(event.getPlayer(), is, event);
+                    increaseThirst(event.getPlayer());
                 }
 
 
@@ -180,19 +184,13 @@ public class HungerCraftThirst extends JavaPlugin implements Listener, Runnable 
     }
 
 
-    public void increaseThirst(Player p, ItemStack is, PlayerInteractEvent e) {
+    public void increaseThirst(Player p) {
 
         if(players.get(p.getName()) >= 100) {
             p.sendMessage("You quench your thirst.");
         } else {
             setThirst(p.getName(), 100);
             p.sendMessage("You quench your thirst");
-        }
-
-        //place an empty bottle in the players inventory
-        if(is != null && is.getTypeId() == 373) {
-            e.setUseItemInHand(Event.Result.DENY);
-            e.getItem().setTypeId(374);
         }
 
     }
